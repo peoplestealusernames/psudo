@@ -1,47 +1,36 @@
 import moment from "moment";
-import { Component } from "react";
-import { Typography, TypographyProps } from "@mui/material"
+import { Component, CSSProperties, useEffect, useState } from "react";
 
 interface DigitalClockProps {
-    TypoProp?: TypographyProps;
+    style?: CSSProperties;
     DateFormat: string;
     UpdateInterval: number;
 }
 
+export function DigitalClock({ style, DateFormat, UpdateInterval }: DigitalClockProps) {
+    const [timer, setTimer] = useState<NodeJS.Timer>()
+    const [time, setTime] = useState<string>()
 
-export default class DigitalClock extends Component<DigitalClockProps> {
-    timer?: NodeJS.Timer;
-    TypoProp?: TypographyProps;
+    useEffect(() => {
+        GetTime()
 
-    DateFormat: string
-    UpdateInterval: number
+        if (timer)
+            clearInterval(timer);
 
-    constructor(props: DigitalClockProps) {
-        super(props);
+        setTimer(setInterval(GetTime, UpdateInterval));
 
-        this.UpdateInterval = props.UpdateInterval
-        this.DateFormat = props.DateFormat
-        this.TypoProp = props.TypoProp
-        this.state = { time: this.GetTime() };
+        return () => {
+            if (timer)
+                clearInterval(timer);
+        }
+    }, [timer])
+
+
+    function GetTime() {
+        setTime(moment().format(DateFormat))
     }
 
-    render() {
-        return (
-            //@ts-ignore
-            <Typography {...this.TypoProp}> {this.state.time} </Typography>
-        );
-    }
-
-    componentDidMount() {
-        this.timer = setInterval(() => this.setState({ time: this.GetTime() }), this.UpdateInterval);
-    }
-
-    componentWillUnmount() {
-        //@ts-ignore
-        clearInterval(this.timer);
-    }
-
-    GetTime() {
-        return moment().format(this.DateFormat)
-    }
+    return (
+        <div style={style}> {time} </div>
+    );
 }
