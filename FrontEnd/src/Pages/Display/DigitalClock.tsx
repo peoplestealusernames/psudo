@@ -1,5 +1,5 @@
 import moment from "moment";
-import { Component, CSSProperties, useEffect, useState } from "react";
+import { CSSProperties, useEffect, useRef, useState } from "react";
 
 interface DigitalClockProps {
     style?: CSSProperties;
@@ -7,27 +7,30 @@ interface DigitalClockProps {
     UpdateInterval: number;
 }
 
+//let N = 0;
 export function DigitalClock({ style, DateFormat, UpdateInterval }: DigitalClockProps) {
-    const [timer, setTimer] = useState<NodeJS.Timer>()
+    const timerRef = useRef<NodeJS.Timer | null>(null)
     const [time, setTime] = useState<string>()
 
     useEffect(() => {
         GetTime()
 
-        if (timer)
-            clearInterval(timer);
+        if (timerRef.current)
+            clearInterval(timerRef.current);
 
-        setTimer(setInterval(GetTime, UpdateInterval));
+        timerRef.current = setInterval(GetTime, UpdateInterval);
 
         return () => {
-            if (timer)
-                clearInterval(timer);
+            if (timerRef.current)
+                clearInterval(timerRef.current);
         }
-    }, [timer])
+    }, [timerRef])
 
 
     function GetTime() {
         setTime(moment().format(DateFormat))
+        //N++;
+        //setTime(N.toString())
     }
 
     return (
